@@ -82,78 +82,89 @@
   </body>
 
   <script>
-    const letter = "abcdefghijklmnopqrstuvwxyz";
-    const encode = (phrase, key) => {
-      if (gcd(key.a, letter.length) !== 1) {
-        throw new Error("a and b must be coprime.");
-      }
+    function modInverse(a, m) {
+  // validate inputs
+  [a, m] = [Number(a), Number(m)]
+  if (Number.isNaN(a) || Number.isNaN(m)) {
+    return NaN // invalid input
+  }
+  a = (a % m + m) % m
+  if (!a || m < 2) {
+    return NaN // invalid input
+  }
+  // find the gcd
+  const s = []
+  let b = m
+  while(b) {
+    [a, b] = [b, a % b]
+    s.push({a, b})
+  }
+  if (a !== 1) {
+    return NaN // inverse does not exists
+  }
+  // find the inverse
+  let x = 1
+  let y = 0
+  for(let i = s.length - 2; i >= 0; --i) {
+    [x, y] = [y,  x - y * Math.floor(s[i].a / s[i].b)]
+  }
+  return (y % m + m) % m
+}
 
-      let encodedPhrase = "";
-      let whiteSpaceCounter = 0;
 
-      for (let i = 0; i < phrase.length; i++) {
-        if (/[0-9]/.test(phrase[i])) {
-          encodedPhrase += phrase[i];
-          whiteSpaceCounter += 1;
-        } else {
-          const x = letter.split("").findIndex((c) => c === phrase[i].toLowerCase());
+var affineCipher = function(text,a,b,method){
+   let citext = "";
+   let alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+   let alpha_index= 0;
+   let inverse =0;
 
-          if (x > -1) {
-            const e = (key.a * x + key.b) % letter.length;
-            encodedPhrase += letter[e];
-            whiteSpaceCounter += 1;
+   if(method === "Encode"){
+      for (let i = 0; i < text.length; i++){
+        for (let u =0; u < alpha.length; u++){
+          if(text[i] === alpha[u]){
+              alpha_index = u;
+              citext += alpha[(((a * alpha_index) + b) % 26)];
+
+          }else if (text[i] === alpha[u].toLowerCase()) {
+             alpha_index = u;
+             citext += alpha[(((a * alpha_index) + b) % 26)].toLowerCase();
+
+          }else if (text[i] == " ") {
+             citext += " ";
+             i++;
           }
         }
       }
-      return encodedPhrase;
-    };
+    return citext;
+   }
+   else{
 
-    const decode = (phrase, key) => {
-      if (gcd(key.a, letter.length) !== 1) {
-        throw new Error("a and b must be coprime.");
-      }
+     for (let i = 0; i < text.length; i++){
+       for (let u =0; u < alpha.length; u++){
+         if(text[i] === alpha[u]){
+             alpha_index = u;
+             citext += alpha[(((modInverse(a ,26) * (alpha_index - b)) % 26) < 0)? (26 - Math.abs((modInverse(a ,26) * (alpha_index - b)) % 26)): (((modInverse(a ,26) * (alpha_index - b)) % 26))];
+         }
+         else if (text[i] === alpha[u].toLowerCase()) {
+            alpha_index = u;
+            citext += alpha[(((modInverse(a ,26) * (alpha_index - b)) % 26) < 0)? (26 - Math.abs((modInverse(a ,26) * (alpha_index - b)) % 26)): (((modInverse(a ,26) * (alpha_index - b)) % 26))].toLowerCase();
 
-      let decodedPhrase = "";
-      let whiteSpaceCounter = 0;
-
-      for (let i = 0; i < phrase.length; i++) {
-        if (/[0-9]/.test(phrase[i])) {
-          decodedPhrase += phrase[i];
-          whiteSpaceCounter += 1;
-        } else {
-          const y = letter.split("").findIndex((p) => p === phrase[i].toLowerCase());
-
-          if (y > -1) {
-            const d = (mmi * y - key.b) % letter.length;
-            decodedPhrase += letter[d];
-            whiteSpaceCounter += 1;
-          }
-        }
-      }
-      return decodedPhrase;
-    };
-
-    const gcd = (a, b) => {
-      if (!b) {
-        return a;
-      }
-      return gcd(b, a % b);
-    };
-
-    const mmi = (a, m) => {
-      for (let x = 1; x < m; x++) {
-        if (((a % m) * (x % m)) % m == 1) {
-          return x;
-        }
-      }
-    };
+         }else if (text[i] == " ") {
+            citext += " ";
+            i++;
+         }
+       }
+     }
+    return citext;
+   }
+}
 
     function encrypt() {
       const nilaiA = parseInt(document.getElementById("nilaiA").value);
       const nilaiB = parseInt(document.getElementById("nilaiB").value);
       const plaintext = document.getElementById("plain").value;
       const keys = { a: nilaiA, b: nilaiB };
-      let encodeHasil = encode(plaintext, keys);
+      let encodeHasil = affineCipher(plaintext,nilaiA,nilaiB,"Encode");
       document.getElementById("hasilE").innerHTML = encodeHasil;
       document.getElementById("hasilE").value = encodeHasil;
       console.log(nilaiA);
@@ -166,7 +177,7 @@
       const nilaiB = parseInt(document.getElementById("nilaiB").value);
       const ciphertext = document.getElementById("cipher").value;
       const keys = { a: nilaiA, b: nilaiB };
-      let decodeHasil = decode(ciphertext, keys);
+      let decodeHasil = affineCipher(ciphertext,nilaiA,nilaiB,"Decode");
       document.getElementById("hasilD").innerHTML = decodeHasil;
       document.getElementById("hasilD").value = decodeHasil;
       console.log(nilaiA);
