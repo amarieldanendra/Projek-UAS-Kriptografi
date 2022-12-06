@@ -85,7 +85,7 @@
     return;
     }
     var key = document.getElementById("kunci").value.toLowerCase().replace(/[^a-z]/g, "_");
-    var pc = document.getElementById("pc").value.toLowerCase().replace(/[^a-z]/g, "_");
+    var pc = "";
     if (pc == "") pc = "x";
     while (plaintext.length % key.length != 0) plaintext += pc.charAt(0);
     var colLength = plaintext.length / key.length;
@@ -106,7 +106,7 @@
     document.getElementById("c").value = ciphertext;
   }
 
-  function Decrypt(f) {
+  function Decrypt() {
     ciphertext = document.getElementById("pD").value.toLowerCase().replace(/[^a-z]/g, " ");
     if (ciphertext.length < 1) {
     alert("please enter some ciphertext (letters only)");
