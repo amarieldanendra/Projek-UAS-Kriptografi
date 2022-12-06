@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.0/font/bootstrap-icons.css" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Enkripsi Affine Cipher</title>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container-fluid">
+        <a href="./index.html">Kriptografi</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="./affine.html">Affine Cipher</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="./columnar.html">Columnar Cipher</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="judul">
+      <h1>Columnar Cipher Encrypt</h1>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-6 col-md-6">
+        <div class="card pt-4 pb-4 px-4">
+          <!-- Enkripsi -->
+          <div class="enkripsi">
+            <p>Masukan Key</p>
+            <input style="padding: 10px" id="kunci" type="text" name="kunci" size="30" /><br /><br />
+            <p>Masukan Pad Character</p>
+            <input style="padding: 10px" id="pc" type="text" name="pc" size="30" /><br /><br />
+
+            <p>Masukan Plaintext</p>
+            <textarea style="padding: 10px" id="p" name="p" rows="2" cols="30"></textarea><br /><br />
+
+            <button type="button" class="btn" name="btnEn" style="border-color: black" onclick="handleEncrypt()">Enkripsi</button><br /><br />
+
+            <p>Ciphertext</p>
+            <textarea id="c" name="c" rows="2" cols="30"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dekripsi -->
+      <div class="col-lg-6 col-md-6">
+        <div class="card pt-4 pb-4 px-4">
+          <div class="dekripsi">
+            <p>Masukan Key</p>
+            <input style="padding: 10px" id="kunci" type="text" name="kunci" size="30" /><br /><br />
+            <p>Masukan Pad Character</p>
+            <input style="padding: 10px" id="pc" type="text" name="pc" size="30" /><br /><br />
+
+            <p>Masukan Ciphertext</p>
+            <textarea style="padding: 10px" id="p" name="p" rows="2" cols="30"></textarea><br /><br />
+
+            <button type="button" class="btn" name="btnEn" style="border-color: black" onclick="handleEncrypt()">Enkripsi</button><br /><br />
+
+            <p>Plaintext</p>
+            <textarea id="c" name="c" rows="2" cols="30"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+  <script>
+    var chars = "abcdefghijklmnopqrstuvwxyz";
+
+    function handleEncrypt() {
+      var plaintext = normalize(getById("p").value);
+      if (validate(plaintext, "Please enter some plaintext.")) return;
+      var kunci = normalize(getById("kunci").value);
+      var pc = normalize(getById("pc").value);
+      getById("c").value = Encrypt(plaintext, kunci, pc);
+    }
+
+    function Encrypt(plaintext, kunci, pc) {
+      var pjgkey = kunci.length;
+      if (pc == "") pc = "_";
+      while (plaintext.length % pjgkey != 0) {
+        plaintext += pc.charAt(0);
+      }
+      var colLength = plaintext.length / pjgkey;
+      var ciphertext = "";
+      k = 0;
+      for (i = 0; i < pjgkey; i++) {
+        while (k < 26) {
+          t = kunci.indexOf(chars.charAt(k));
+          arrkw = kunci.split("");
+          arrkw[t] = "_";
+          kunci = arrkw.join("");
+          if (t >= 0) break;
+          else k++;
+        }
+        for (j = 0; j < colLength; j++) {
+          ciphertext += plaintext.charAt(j * pjgkey + t);
+        }
+      }
+      return ciphertext;
+    }
+
+    function validate(text, message) {
+      if (text.length < 1) {
+        alert(message);
+      }
+    }
+
+    function getById(id) {
+      return document.getElementById(id);
+    }
+
+    function normalize(value) {
+      return value.toLowerCase().replace(/[^a-z]/g, "");
+    }
+  </script>
+</html>
