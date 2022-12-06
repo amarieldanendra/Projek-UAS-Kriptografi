@@ -51,7 +51,7 @@
             <p>Masukan Plaintext</p>
             <textarea style="padding: 10px" id="p" name="p" rows="2" cols="30"></textarea><br /><br />
 
-            <button type="button" class="btn" name="btnEn" style="border-color: black" onclick="encode()">Enkripsi</button><br /><br />
+            <button type="button" class="btn" name="btnEn" style="border-color: black" onclick="Encrypt()">Enkripsi</button><br /><br />
 
             <p>Ciphertext</p>
             <textarea id="c" name="c" rows="2" cols="30"></textarea>
@@ -71,7 +71,7 @@
             <p>Masukan Ciphertext</p>
             <textarea style="padding: 10px" id="pD" name="p" rows="2" cols="30"></textarea><br /><br />
 
-            <button type="button" class="btn" name="btnEn" style="border-color: black" onclick="decode()">Dekripsi</button><br /><br />
+            <button type="button" class="btn" name="btnEn" style="border-color: black" onclick="Decrypt()">Dekripsi</button><br /><br />
 
             <p>Plaintext</p>
             <textarea id="cD" name="cD" rows="2" cols="30"></textarea>
@@ -82,95 +82,73 @@
   </body>
 
   <script>
-  var chars = "abcdefghijklmnopqrstuvwxyz";
-
-function encode() {
-  const key = document.querySelector('#kunci').value.toUpperCase();
-  const text = document.querySelector('#p').value;
-  const resultBox = document.querySelector('#c');
-  let cipher = "";
-  let k_index = 0;
-  let text_len = parseFloat(text.length)
-  let text_list = text.split("");
-  let key_list = key.split("").sort();
-
-  let col = key.length;
-  let row = parseInt(Math.ceil(text_len / col));
-
-  let fill_missing = parseInt((row * col) - text_len);
-  for (let i = 0; i < fill_missing; i++) {
-    text_list.push('_')
-  }
-
-  let matrix = [];
-  let rowMatrix = [];
-  let textIndex = 0;
-  for (let i = 0; i < row; i++) {
-    rowMatrix = [];
-    for (let j = 0; j < col; j++) {
-      rowMatrix.push(text_list[textIndex]);
-      textIndex++;
+  function Encrypt() {
+    plaintext = document.getElementById("p").value.toLowerCase().replace(/[^a-z]/g, "_");
+    if (plaintext.length < 1) {
+    alert("please enter some plaintext");
+    return;
     }
-    matrix.push(rowMatrix)
-  }
-
-  let curr_idx;
-  for (let i = 0; i < matrix[0].length; i++) {
-    curr_idx = key.indexOf(key_list[k_index]);
-    // console.log(curr_idx);
-    for (let j in matrix) {
-      cipher += matrix[j][curr_idx]
+    var key = document.getElementById("kunci").value.toLowerCase().replace(/[^a-z]/g, "_");
+    var pc = document.getElementById("pc").value.toLowerCase().replace(/[^a-z]/g, "_");
+    if (pc == "") pc = "x";
+    while (plaintext.length % key.length != 0) plaintext += pc.charAt(0);
+    var colLength = plaintext.length / key.length;
+    var chars = "abcdefghijklmnopqrstuvwxyz";
+    ciphertext = "";
+    k = 0;
+    for (i = 0; i < key.length; i++) {
+    while (k < 26) {
+      t = key.indexOf(chars.charAt(k));
+      arrkw = key.split("");
+      arrkw[t] = "_";
+      key = arrkw.join("");
+      if (t >= 0) break;
+      else k++;
     }
-    k_index += 1;
-  }
-
-  // console.log(key_list)
-  // console.log(matrix)
-  // console.log(cipher)
-  resultBox.innerHTML = cipher;
-}
-
-function decode() {
-  const key = document.querySelector('#kunciD').value.toUpperCase();
-  const text = document.querySelector('#pD').value;
-  const resultBox = document.querySelector('#cD');
-  let decoded = "";
-  let text_index = 0;
-  let text_len = parseFloat(text.length)
-  let text_list = text.split("");
-  let k_index = 0;
-  let col = key.length;
-  let row = parseInt(Math.ceil(text_len / col));
-  let key_list = key.split("").sort();
-  let dec_cipher = [];
-  let row_dec_cipher = [];
-
-  for (let i = 0; i < row; i++) {
-    row_dec_cipher = [];
-    for (let j = 0; j < col; j++) {
-      row_dec_cipher.push('.');
+    for (j = 0; j < colLength; j++) ciphertext += plaintext.charAt(j * key.length + t);
     }
-    dec_cipher.push(row_dec_cipher);
-    
+    document.getElementById("c").value = ciphertext;
   }
 
-  let curr_idx;
-  for (let i = 0; i < col; i++) {
-    curr_idx = key.indexOf(key_list[k_index]);
-
-    for (let j = 0; j < row; j++) {
-      dec_cipher[j][curr_idx] = text_list[text_index];
-      text_index += 1;
+  function Decrypt(f) {
+    ciphertext = document.getElementById("pD").value.toLowerCase().replace(/[^a-z]/g, " ");
+    if (ciphertext.length < 1) {
+    alert("please enter some ciphertext (letters only)");
+    return;
     }
-    k_index += 1;
+    keyword = document.getElementById("kunciD").value.toLowerCase().replace(/[^a-z]/g, " ");
+    klen = keyword.length;
+    if (klen <= 1) {
+    alert("keyword should be at least 2 characters long");
+    return;
+    }
+    if (ciphertext.length % klen != 0) {
+    alert("ciphertext has not been padded, the result may be incorrect (incorrect keyword?).");
+    }
+    // first we put the text into columns based on keyword length
+    var cols = new Array(klen);
+    var colLength = ciphertext.length / klen;
+    for (i = 0; i < klen; i++) cols[i] = ciphertext.substr(i * colLength, colLength);
+    // now we rearrange the columns so that they are in their unscrambled state
+    var newcols = new Array(klen);
+    chars = "abcdefghijklmnopqrstuvwxyz";
+    j = 0;
+    i = 0;
+    while (j < klen) {
+    t = keyword.indexOf(chars.charAt(i));
+    if (t >= 0) {
+      newcols[t] = cols[j++];
+      arrkw = keyword.split("");
+      arrkw[t] = "_";
+      keyword = arrkw.join("");
+    } else i++;
+    }
+    // now read off the columns row-wise
+    plaintext = "";
+    for (i = 0; i < colLength; i++) {
+    for (j = 0; j < klen; j++) plaintext += newcols[j].charAt(i);
+    }
+    document.getElementById("cD").value = plaintext;
   }
-  
-  // decoded = dec_cipher.join('');
-  dec_cipher.forEach(function (row){
-    decoded += row.join('');
-  })
-
-  resultBox.innerHTML = decoded;
-}
   </script>
 </html>
